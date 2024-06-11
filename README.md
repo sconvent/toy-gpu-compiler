@@ -16,3 +16,4 @@ To actually run compiled code, a CUDA installation is necessary:
 - Compile the project: `make`
 
 ## Examples
+- Run the `run.sh` script to compile the examples in the `examples` directory

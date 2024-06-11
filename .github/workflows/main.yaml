@@ -1,4 +1,4 @@
-name: Build and Install
+name: Build compiler and compile examples
 
 on:
   push:
