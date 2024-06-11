@@ -1,0 +1,32 @@
+name: Build and Install
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install CMake
+      run: sudo apt update && sudo apt install -y cmake
+
+    - name: Install ANTLR4 Runtime
+      run: sudo apt install -y libantlr4-runtime-dev
+
+    - name: Install LLVM 15
+      run: sudo apt install -y llvm-15
+
+    - name: Create build directory
+      run: mkdir build && cd build && cmake ..
+
+    - name: Build project
+      run: cd build && make
+
+    - name: Compile examples
+      run: cd examples && ./run.sh
