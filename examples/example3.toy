@@ -1,0 +1,11 @@
+void kernel(float32* a, float32* b, float32* c,) {
+    float32* a_pointer;
+    float32* b_pointer;
+    float32* c_pointer;
+
+    a_pointer = a + threadIdX;
+    b_pointer = b + threadIdX;
+    c_pointer = c + threadIdX;
+
+    *c_pointer = *a_pointer+*b_pointer;
+}
