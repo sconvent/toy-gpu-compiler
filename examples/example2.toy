@@ -1,3 +1,0 @@
-void kernel(int32 a, int32 b, int32* result,) {
-    *result = a+b;
-}
