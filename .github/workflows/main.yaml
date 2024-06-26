@@ -29,4 +29,4 @@ jobs:
       run: cd build && make
 
     - name: Compile examples
-      run: cd examples && ./run.sh
+      run: cd examples && make nvptx
