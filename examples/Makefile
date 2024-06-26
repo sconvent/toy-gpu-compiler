@@ -6,7 +6,7 @@ default: run
 %.ptx: %.ll
 	/usr/lib/llvm-15/bin/llc $< -o $@
 
-nvptx: addition.ptx
+nvptx: addition.ptx saxpy.ptx
 
 main.app: main.cpp
 	clang++ main.cpp -o main.app -g -I/usr/local/cuda/include -L/usr/lib/wsl/lib -lcuda

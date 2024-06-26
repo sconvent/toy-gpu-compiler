@@ -1,13 +1,15 @@
-void kernel(float32 alpha, float32* x, float32* y, int32 n,) {
+void kernel(float32 alpha, float32* x, float32* y, float32* z, int32 n,) {
     int32 i;
     i = threadIdX;
     while(i < n) {
         float32* x_pointer;
         float32* y_pointer;
+        float32* z_pointer;
         x_pointer = x + i;
         y_pointer = y + i;
+        z_pointer = z + i;
 
-        *y_pointer = alpha * *x_pointer + *y_pointer;
+        *z_pointer = alpha * *x_pointer + *y_pointer;
 
         i = i + blockDimX;
     };
