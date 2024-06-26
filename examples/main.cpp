@@ -18,7 +18,7 @@ void executeAdditionExample(CUcontext *context, std::string *str) {
   checkCudaErrors(cuModuleLoadDataEx(&cudaModule, str->c_str(), 0, 0, 0));
   checkCudaErrors(cuModuleGetFunction(&function, cudaModule, "kernel"));
 
-  uint32_t size = 256;
+  uint32_t size = 32;
 
   CUdeviceptr devBufferA;
   CUdeviceptr devBufferB;
@@ -110,82 +110,7 @@ int main(int argc, char **argv) {
   // Create driver context
   checkCudaErrors(cuCtxCreate(&context, 0, device));
 
-/*
-  // Create module for object
-  checkCudaErrors(cuModuleLoadDataEx(&cudaModule, str.c_str(), 0, 0, 0));
-
-  // Get kernel function
-  checkCudaErrors(cuModuleGetFunction(&function, cudaModule, "kernel"));
-
-  executeAdditionExample(&context, &str)
-
-  uint32_t size = 256;
-
-  float factor = 2.0f;
-
-
-  // Device data
-  CUdeviceptr devBufferA;
-  CUdeviceptr devBufferB;
-  CUdeviceptr devBufferC;
-
-  checkCudaErrors(cuMemAlloc(&devBufferA, sizeof(float)*size));
-  checkCudaErrors(cuMemAlloc(&devBufferB, sizeof(float)*size));
-  checkCudaErrors(cuMemAlloc(&devBufferC, sizeof(float)*size));
-
-  float* hostA = new float[size];
-  float* hostB = new float[size];
-  float* hostC = new float[size];
-
-  // Populate input
-  for (unsigned i = 0; i != size; ++i) {
-    hostA[i] = (float)i;
-    hostB[i] = (float)(2*i);
-    hostC[i] = 0.0f;
-  }
-
-  checkCudaErrors(cuMemcpyHtoD(devBufferA, &hostA[0], sizeof(float)*size));
-  checkCudaErrors(cuMemcpyHtoD(devBufferB, &hostB[0], sizeof(float)*size));
-
-
-  unsigned blockSizeX = 32;
-  unsigned blockSizeY = 1;
-  unsigned blockSizeZ = 1;
-  unsigned gridSizeX  = 1;
-  unsigned gridSizeY  = 1;
-  unsigned gridSizeZ  = 1;
-
-  // Kernel parameters
-  void *KernelParams[] = { &factor, &devBufferA, &devBufferB, &devBufferC , &size};
-
-  std::cout << "Launching kernel\n";
-
-  // Kernel launch
-  checkCudaErrors(cuLaunchKernel(function, gridSizeX, gridSizeY, gridSizeZ,
-                                 blockSizeX, blockSizeY, blockSizeZ,
-                                 0, NULL, KernelParams, NULL));
-
-  // Retrieve device data
-  checkCudaErrors(cuMemcpyDtoH(&hostC[0], devBufferC, sizeof(float)*size));
-
-
-  std::cout << "Results:\n";
-  for (unsigned i = 0; i != size; ++i) {
-    std::cout << factor  << "*" << hostA[i] << " + " << hostB[i] << " = " << hostC[i] << "\n";
-  }
-
-  // Cleanup
-  delete [] hostA;
-  delete [] hostB;
-  delete [] hostC;
-
-  checkCudaErrors(cuMemFree(devBufferA));
-  checkCudaErrors(cuMemFree(devBufferB));
-  checkCudaErrors(cuMemFree(devBufferC));
-  checkCudaErrors(cuModuleUnload(cudaModule));
-  checkCudaErrors(cuCtxDestroy(context));
-*/
-  checkCudaErrors(cuCtxDestroy(context));
+  executeAdditionExample(&context, &str);
 
   return 0;
 }
