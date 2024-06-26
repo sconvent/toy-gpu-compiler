@@ -1,5 +1,5 @@
 # Toy GPU Compiler
-A Toy Compiler to compile a C-style language to NVPTX
+A Toy Compiler to compile a C-style language to NVPTX. It is partially based on a [User Guide](https://llvm.org/docs/NVPTXUsage.html) by the LLVM Project: 
 
 ## Prerequisites
 Under Ubuntu:
