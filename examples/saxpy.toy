@@ -1,7 +1,12 @@
-void kernel(float32 alpha, float32* x, float32* y, float32* z, int32 n,) {
+void kernel(float32 alpha, float32* x, float32* y, float32* z, int32 chunk_size,) {
+    int32 lower_limit;
+    lower_limit = chunk_size * blockIdX;
+    int32 upper_limit;
+    upper_limit = lower_limit + chunk_size;
     int32 i;
-    i = threadIdX;
-    while(i < n) {
+    i = lower_limit + threadIdX;
+
+    while(i < upper_limit) {
         float32* x_pointer;
         float32* y_pointer;
         float32* z_pointer;

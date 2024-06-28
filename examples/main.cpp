@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <chrono>
 #include "cuda.h"
 
 // Inspired by an LLVM User Guide: https://llvm.org/docs/NVPTXUsage.html
@@ -11,6 +12,7 @@ void checkCudaErrors(CUresult err) {
 
 void executeAdditionExample(CUcontext *context) {
   // Executes C = A + B for float arrays A, B, C; Each thread only executes one addition
+  std::cout << "\nStarting Addition Example\n";
 
   CUmodule    cudaModule;
   CUfunction  function;
@@ -72,7 +74,7 @@ void executeAdditionExample(CUcontext *context) {
   // Check results
   bool correct = true;
   for (unsigned i = 0; i < size && correct; i++) {
-    if(hostC[i] - (hostA[i] + hostB[i]) > 0.0000001f) { // Equality check for floats
+    if(abs(hostC[i] - (hostA[i] + hostB[i])) > 0.0000001f) { // Equality check for floats
       correct = false;
       std::cout << hostA[i] << " + " << hostB[i] << " = " << hostC[i] << " is incorrect!\n";
     }
@@ -98,6 +100,7 @@ void executeAdditionExample(CUcontext *context) {
 
 void executeSaxpyExample(CUcontext *context) {
   // Executes Z = alpha * X + Y for float arrays X, Y, Z and float scalar alpha; Each thread calculates a chunk of the array
+  std::cout << "\nStarting Saxpy Example\n";
 
   CUmodule    cudaModule;
   CUfunction  function;
@@ -140,27 +143,48 @@ void executeSaxpyExample(CUcontext *context) {
   checkCudaErrors(cuMemcpyHtoD(devBufferX, &hostX[0], sizeof(float)*size));
   checkCudaErrors(cuMemcpyHtoD(devBufferY, &hostY[0], sizeof(float)*size));
 
-  unsigned blockSizeX = 32;
+  unsigned blockSizeX = 128;
   unsigned blockSizeY = 1;
   unsigned blockSizeZ = 1;
-  unsigned gridSizeX  = 1;
+  unsigned gridSizeX  = 128;
   unsigned gridSizeY  = 1;
   unsigned gridSizeZ  = 1;
 
-  int elementsPerThread = 32;
-  void *KernelParams[] = { &alpha, &devBufferX, &devBufferY, &devBufferZ, &elementsPerThread };
+  int chunksize = size/gridSizeX;
+  void *KernelParams[] = { &alpha, &devBufferX, &devBufferY, &devBufferZ, &chunksize };
 
-  // Execute kernel
+  // Execute kernel with time measurement
+  auto start = std::chrono::high_resolution_clock::now();
+
   checkCudaErrors(cuLaunchKernel(function, gridSizeX, gridSizeY, gridSizeZ,
                                  blockSizeX, blockSizeY, blockSizeZ,
                                  0, NULL, KernelParams, NULL));
+  cuCtxSynchronize();
+
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+  std::cout << "Time taken by saxpy kernel: " << duration.count() << " microseconds\n";
+  std::cout << "Total bytes read: " << size*2*4 << "\n"; // X and Y array; 4 bytes per float
+  std::cout << "Total bytes written: " << size*4 << "\n";  // Z array; 4 bytes per float
+  std::cout << "Achieved memory bandwidth: " << size*3*4 / duration.count() / 1000 << " GB/sec\n"; 
 
   // Retrieve results
   checkCudaErrors(cuMemcpyDtoH(&hostZ[0], devBufferZ, sizeof(float)*size));
 
-  std::cout << "Saxpy results (only the first 5):\n";
-  for (unsigned i = 0; i < 5; i++) {
-    std::cout << alpha << " * " << hostX[i] << " + " << hostY[i] << " = " << hostZ[i] << "\n";
+  // Check results
+  bool correct = true;
+  for (unsigned i = 0; i < size && correct; i++) {
+    if(abs(hostZ[i] - (alpha * hostX[i] + hostY[i])) > 0.0000001f) { // Equality check for floats
+      correct = false;
+      std::cout << i << ": " << alpha << " * " << hostX[i] << " + " << hostY[i] << " = " << hostZ[i] << " is incorrect!\n";
+    }
+  }
+
+  if (correct) {
+    std::cout << "Saxpy results (only the first 5):\n";
+    for (unsigned i = 0; i < 5; i++) {
+      std::cout << alpha << " * " << hostX[i] << " + " << hostY[i] << " = " << hostZ[i] << "\n";
+    }
   }
 
   // Cleanup

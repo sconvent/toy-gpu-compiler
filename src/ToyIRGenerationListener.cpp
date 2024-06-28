@@ -161,42 +161,43 @@ void ToyIRGenerationListener::exitExpr(ToyParser::ExprContext *ctx) {
         currentValueStack.pop();
         llvm::Value *b = currentValueStack.top();
         currentValueStack.pop();
+        // TODO: Get handling of floats + pointers right for all operations
         if(ctx->getText().find("+") != std::string::npos) {
             if(b->getType()->isPointerTy()) {
                 llvm::Value *result = builder.CreateGEP(llvm::Type::getFloatTy(context), b, a);
                 currentValueStack.push(result);
             }
             else if(b->getType()->isFloatTy()) {
-                llvm::Value *result = builder.CreateFAdd(a, b);
+                llvm::Value *result = builder.CreateFAdd(b, a);
                 currentValueStack.push(result);
             } else {
-                llvm::Value *result = builder.CreateAdd(a, b);
+                llvm::Value *result = builder.CreateAdd(b, a);
                 currentValueStack.push(result);
             }
         }
         else if(ctx->getText().find("-") != std::string::npos) {
-            llvm::Value *result = builder.CreateSub(a, b);
+            llvm::Value *result = builder.CreateSub(b, a);
             currentValueStack.push(result);
         }
         else if(ctx->getText().find("*") != std::string::npos) {
             if(a->getType()->isFloatTy()) {
-                llvm::Value *result = builder.CreateFMul(a, b);
+                llvm::Value *result = builder.CreateFMul(b, a);
                 currentValueStack.push(result);
             } else {
-                llvm::Value *result = builder.CreateMul(a, b);
+                llvm::Value *result = builder.CreateMul(b, a);
                 currentValueStack.push(result);
             }
         }
         else if(ctx->getText().find("/") != std::string::npos) {
-            llvm::Value *result = builder.CreateSDiv(a, b);
+            llvm::Value *result = builder.CreateSDiv(b, a);
             currentValueStack.push(result);
         }
         else if(ctx->getText().find("<") != std::string::npos) {
-            llvm::Value *result = builder.CreateICmpSLT(a, b);
+            llvm::Value *result = builder.CreateICmpSLT(b, a);
             currentValueStack.push(result);
         }
         else if(ctx->getText().find(">") != std::string::npos) {
-            llvm::Value *result = builder.CreateICmpSGT(a, b);
+            llvm::Value *result = builder.CreateICmpSGT(b, a);
             currentValueStack.push(result);
         }
         else {
